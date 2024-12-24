@@ -51,7 +51,7 @@ def safe_cleanup(directory):
         except Exception as e:
             print(f"Warning: Failed to remove {file_path}: {str(e)}")
 
-def data_update(max_retries=3, retry_delay=1):
+def data_update_from_kaggle(max_retries=3, retry_delay=1):
     kaggle.api.authenticate()
 
     data_dir = os.path.abspath(os.path.join(dirname, "../db/temporary_kaggle_files"))
@@ -127,7 +127,7 @@ def data_update(max_retries=3, retry_delay=1):
 
 if __name__ == '__main__':
     try:
-        df = data_update()
+        df = data_update_from_kaggle()
     except Exception as e:
         print(f"Failed to update data: {str(e)}")
         raise

@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from db_utils import data_update_from_kaggle
 
 class TeamObject:
     # Static season dates dictionary
@@ -108,7 +109,6 @@ WESTERN_CONFERENCE_TEAMS = {'Portland Trail Blazers', 'Los Angeles Lakers', 'Dal
 EASTERN_CONFERENCE_TEAMS = {'Cleveland Cavaliers', 'Atlanta Hawks', 'Miami Heat', 'Boston Celtics',  'Orlando Magic', 'Toronto Raptors', 'Chicago Bulls', 'New Jersey Nets', 'Detroit Pistons', 'Charlotte Bobcats', 'Philadelphia 76ers', 'Indiana Pacers', 'Washington Wizards', 'New York Knicks', 'Milwaukee Bucks', 'Brooklyn Nets', 'Charlotte Hornets'}
 ALL_NBA_TEAMS = WESTERN_CONFERENCE_TEAMS.union(EASTERN_CONFERENCE_TEAMS)
 
-
 def process_filter_db(path=None, dataframe=None):
     # Create DataFrame for summary and filter data
     if not os.path.exists(path) and dataframe is None:
@@ -136,7 +136,6 @@ def generate_dataframe_metrics(range_dataframe, team_objects):
     # Generate possession-based metrics for each game
     for team in team_objects:
         team_games = range_dataframe[(range_dataframe['team_id_home'] == team.id) | (range_dataframe['team_id_away'] == team.id)]
-
         # Iterate through every game and find the metrics
         for index, game in team_games.iterrows():
             game_stats = {}
@@ -206,7 +205,7 @@ def generate_dataframe_metrics(range_dataframe, team_objects):
             # Store all stats for this game date
             team.games[game['game_date']] = game_stats
         
-        return team_objects
+    return team_objects
 
 def generate_individual_season_metrics(team_objects):
     # Generate possession-based metrics for every team in each season
@@ -246,8 +245,6 @@ def generate_relative_metrics(seasons_dict):
             team_data['relative_offensive_rating'] = team_data['average_offensive_rating'] - mean_offensive_rating
             team_data['relative_defensive_rating'] = team_data['average_defensive_rating'] - mean_defensive_rating
     
-    return seasons_dict
-
 if __name__ == "__main__":
     dirname = os.path.dirname(__file__)
     db_path = os.path.abspath(os.path.join(dirname, "../db/game.csv"))
@@ -262,7 +259,7 @@ if __name__ == "__main__":
     seasons_dict = generate_individual_season_metrics(team_objects)
     
     # Add relative net rating to each season
-    seasons_dict = generate_relative_metrics(seasons_dict)
+    generate_relative_metrics(seasons_dict)
     
     # Output the results
     print(seasons_dict)

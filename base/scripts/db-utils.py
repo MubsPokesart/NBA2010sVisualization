@@ -1,6 +1,7 @@
 import os
 import kaggle
 import sqlite3
+import zipfile
 import pandas as pd
 
 # CURRENT STATUS: THIS SCRIPT IS NOT WORKING
@@ -25,8 +26,16 @@ def data_update():
             force=True 
         )
         
-        sql_path = os.path.join(data_dir, 'nba.sqlite')
+        zip_path = os.path.join(data_dir, 'nba.sqlite.zip')
+
+        # Verify file exists and has content
+        if not os.path.exists(zip_path):
+            raise FileNotFoundError(f"Zip file not found at {zip_path}")
         
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(data_dir)
+        
+        sql_path = os.path.join(data_dir, 'nba.sqlite')
         # Verify file exists and has content
         if not os.path.exists(sql_path):
             raise FileNotFoundError(f"SQLite file not found at {sql_path}")
@@ -39,12 +48,10 @@ def data_update():
 
         # Connect to database
         conn = sqlite3.connect(sql_path)
-        query = """
-        SELECT name FROM sqlite_master 
-        WHERE type='table';
-        """
+        query = "SELECT * FROM game"
         df = pd.read_sql_query(query, conn)
-        print("Found tables:", df)
+        conn.close()
+        print(df.head())
         
         return df
         

@@ -1,12 +1,16 @@
 import os
+import ast
+import json
+import time
 import kaggle
 import sqlite3
 import zipfile
 import pandas as pd
-import time
 from contextlib import contextmanager
 
 dirname = os.path.dirname(__file__)
+
+# General sql and file utility functions
 
 @contextmanager
 def sqlite_connection(db_path, timeout=30):
@@ -51,6 +55,7 @@ def safe_cleanup(directory):
         except Exception as e:
             print(f"Warning: Failed to remove {file_path}: {str(e)}")
 
+# Kaggle based utility functions
 def data_update_from_kaggle(max_retries=3, retry_delay=1):
     kaggle.api.authenticate()
 
@@ -125,9 +130,145 @@ def data_update_from_kaggle(max_retries=3, retry_delay=1):
     finally:
         safe_cleanup(data_dir)
 
+# NBA Database parsing utility functions
+def create_schema(conn):
+    """Create the database schema."""
+    cursor = conn.cursor()   
+    with open(os.path.join(dirname, "db_create.sql"), 'r') as f:
+        schema = f.read()
+        cursor.executescript(schema)
+        cursor.executemany(
+        "INSERT OR IGNORE INTO Conferences (conference_id, conference_name) VALUES (?, ?)",
+        [('W', 'Western'), ('E', 'Eastern')]
+        )
+    conn.commit()
+
+def insert_seasons(conn, seasons_data):
+    """Insert seasons into the database."""
+    cursor = conn.cursor()
+    seasons = [(season,
+               int(season.split('-')[0]),
+               2000 + int(season.split('-')[1]))
+              for season in seasons_data.keys()]
+    cursor.executemany(
+        "INSERT OR IGNORE INTO Seasons (season_id, start_year, end_year) VALUES (?, ?, ?)",
+        seasons
+    )
+    conn.commit()
+
+def insert_teams(conn, data):
+    """Insert teams into the database."""
+    cursor = conn.cursor()
+    # Collect unique teams with their conferences
+    teams = set()
+    for season_data in data.values():
+        for team_data in season_data:
+            teams.add((team_data['team'], team_data['conference'][0]))  # Use first letter of conference as ID
+    # Insert teams
+    cursor.executemany(
+        "INSERT OR IGNORE INTO Teams (team_name, conference_id) VALUES (?, ?)",
+        list(teams)
+    )
+    conn.commit()
+
+def insert_team_stats(conn, data):
+    """Insert team statistics into the database."""
+    cursor = conn.cursor()
+    
+    # Get team_id mapping
+    cursor.execute("SELECT team_id, team_name FROM Teams")
+    team_mapping = {name: id for id, name in cursor.fetchall()}
+    
+    # Prepare stats data
+    stats_data = []
+    for season_id, season_data in data.items():
+        for team_data in season_data:
+            team_id = team_mapping[team_data['team']]
+            stats_data.append((
+                team_id,
+                season_id,
+                float(team_data['average_offensive_rating']),
+                float(team_data['average_defensive_rating']),
+                float(team_data['average_net_rating']),
+                float(team_data['average_plus_minus']),
+                float(team_data['relative_net_rating']),
+                float(team_data['relative_offensive_rating']),
+                float(team_data['relative_defensive_rating'])
+            ))
+    
+    # Insert stats
+    cursor.executemany("""
+        INSERT OR REPLACE INTO TeamStats (
+            team_id, season_id,
+            average_offensive_rating, average_defensive_rating,
+            average_net_rating, average_plus_minus,
+            relative_net_rating, relative_offensive_rating,
+            relative_defensive_rating
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, stats_data)
+    
+    conn.commit()
+
+def load_data_to_db(data_object, db_path): 
+    # Connect to database
+    conn = sqlite3.connect(db_path)
+    
+    try:
+        # Create schema
+        create_schema(conn)
+        
+        # Insert data
+        insert_seasons(conn, data_object)
+        insert_teams(conn, data_object)
+        insert_team_stats(conn, data_object)
+        
+        print(f"Successfully loaded data into {db_path}")
+        
+    except Exception as e:
+        print(f"Error loading data: {e}")
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+# Example usage:
+if __name__ == "__main__":
+    # Assuming data_string contains your dictionary string
+    with open('paste.txt', 'r') as f:
+        data_string = f.read()
+    
+    load_data_to_db(data_string)
+
+    # Verify data
+    conn = sqlite3.connect('decade.db')
+    cursor = conn.cursor()
+    
+    print("\nVerification Queries:")
+    
+    # Count total seasons
+    cursor.execute("SELECT COUNT(*) FROM Seasons")
+    print(f"Total seasons: {cursor.fetchone()[0]}")
+    
+    # Count total teams
+    cursor.execute("SELECT COUNT(*) FROM Teams")
+    print(f"Total teams: {cursor.fetchone()[0]}")
+    
+    # Count total stat entries
+    cursor.execute("SELECT COUNT(*) FROM TeamStats")
+    print(f"Total stat entries: {cursor.fetchone()[0]}")
+    
+    conn.close()
+
+
+
 if __name__ == '__main__':
     try:
         df = data_update_from_kaggle()
     except Exception as e:
         print(f"Failed to update data: {str(e)}")
         raise
+
+    import sqlite3
+    con = sqlite3.connect("tutorial.db")
+    cur = con.cursor()
+    cur.executescript

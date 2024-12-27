@@ -3,7 +3,7 @@ import json
 import sqlite3
 import numpy as np
 import pandas as pd
-from db_utils import verify_file, data_update_from_kaggle, sqlite_connection
+from db_utils import verify_file, data_update_from_kaggle, sqlite_connection, load_data_to_db
 from decade_parser import process_filter_db, generate_dataframe_metrics, generate_individual_season_metrics, generate_relative_metrics
 
 dirname = os.path.dirname(__file__)

@@ -1,8 +1,4 @@
 import os
-import json
-import sqlite3
-import numpy as np
-import pandas as pd
 from decade_parser import parse_decade_data
 from db_utils import verify_file, data_update_from_kaggle, load_data_to_db, extract_data_from_db
 

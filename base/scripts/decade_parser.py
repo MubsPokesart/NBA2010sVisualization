@@ -2,7 +2,6 @@ import os
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from db_utils import data_update_from_kaggle
 
 class TeamObject:
     # Static season dates dictionary
@@ -109,14 +108,12 @@ WESTERN_CONFERENCE_TEAMS = {'Portland Trail Blazers', 'Los Angeles Lakers', 'Dal
 EASTERN_CONFERENCE_TEAMS = {'Cleveland Cavaliers', 'Atlanta Hawks', 'Miami Heat', 'Boston Celtics',  'Orlando Magic', 'Toronto Raptors', 'Chicago Bulls', 'New Jersey Nets', 'Detroit Pistons', 'Charlotte Bobcats', 'Philadelphia 76ers', 'Indiana Pacers', 'Washington Wizards', 'New York Knicks', 'Milwaukee Bucks', 'Brooklyn Nets', 'Charlotte Hornets'}
 ALL_NBA_TEAMS = WESTERN_CONFERENCE_TEAMS.union(EASTERN_CONFERENCE_TEAMS)
 
-def process_filter_db(path=None, dataframe=None):
-    # Create DataFrame for summary and filter data
-    if not os.path.exists(path) and dataframe is None:
-        raise ValueError("Either path or dataframe must be provided")
-    elif dataframe is not None:
-        summary_df = dataframe
-    else:
-        summary_df = pd.read_csv(path)
+def process_filter_db(dataframe=None):
+    # Create DataFrame for summary and filter data 
+    if dataframe is None:
+        raise ValueError("The dataframe must be provided")
+    
+    summary_df = dataframe
     summary_df['game_date'] = pd.to_datetime(summary_df['game_date'])
     range_dataframe = summary_df[(summary_df['game_date'] >= START_DATE) & (summary_df['game_date'] < END_DATE)]
 
@@ -245,12 +242,9 @@ def generate_relative_metrics(seasons_dict):
             team_data['relative_offensive_rating'] = team_data['average_offensive_rating'] - mean_offensive_rating
             team_data['relative_defensive_rating'] = team_data['average_defensive_rating'] - mean_defensive_rating
     
-if __name__ == "__main__":
-    dirname = os.path.dirname(__file__)
-    db_path = os.path.abspath(os.path.join(dirname, "../db/game.csv"))
-
+def parse_decade_data(unfiltered_data):
     # Process data and filter based on date
-    range_dataframe, team_objects = process_filter_db(db_path)
+    range_dataframe, team_objects = process_filter_db(unfiltered_data)
     
     # Generate possession-based metrics for each game
     team_objects = generate_dataframe_metrics(range_dataframe, team_objects)
@@ -261,5 +255,4 @@ if __name__ == "__main__":
     # Add relative net rating to each season
     generate_relative_metrics(seasons_dict)
     
-    # Output the results
-    print(seasons_dict)
+    return seasons_dict

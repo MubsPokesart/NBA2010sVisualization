@@ -1,11 +1,11 @@
 import os
-import ast
-import json
 import time
 import kaggle
 import sqlite3
 import zipfile
+import numpy as np
 import pandas as pd
+from collections import defaultdict
 from contextlib import contextmanager
 
 dirname = os.path.dirname(__file__)
@@ -211,8 +211,8 @@ def insert_team_stats(conn, data):
 
 def load_data_to_db(data_object, db_path): 
     # Connect to database
-    conn = sqlite3.connect(db_path)
-    
+    conn = sqlite3.connect(db_path) 
+
     try:
         # Create schema
         create_schema(conn)
@@ -231,44 +231,67 @@ def load_data_to_db(data_object, db_path):
     finally:
         conn.close()
 
-# Example usage:
-if __name__ == "__main__":
-    # Assuming data_string contains your dictionary string
-    with open('paste.txt', 'r') as f:
-        data_string = f.read()
-    
-    load_data_to_db(data_string)
+def extract_data_from_db(db_path):
+    """
+    Extract data from the SQLite database and format it exactly like the original dictionary.
+    Returns a dictionary with the same structure as the input data.
+    """
 
-    # Verify data
-    conn = sqlite3.connect('decade.db')
-    cursor = conn.cursor()
+    with sqlite_connection(db_path) as conn:
+        cursor = conn.cursor()
+        
+        # Get all seasons ordered chronologically
+        cursor.execute("SELECT season_id FROM Seasons ORDER BY start_year, end_year")
+        seasons = [row[0] for row in cursor.fetchall()]
+        
+        # Initialize the result dictionary using defaultdict
+        result = defaultdict(list)
+        
+        # Query to get all data for each season
+        query = """
+        SELECT 
+            s.season_id,
+            t.team_name,
+            t.conference_id,
+            ts.average_offensive_rating,
+            ts.average_defensive_rating,
+            ts.average_net_rating,
+            ts.average_plus_minus,
+            ts.relative_net_rating,
+            ts.relative_offensive_rating,
+            ts.relative_defensive_rating
+        FROM TeamStats ts
+        JOIN Teams t ON ts.team_id = t.team_id
+        JOIN Seasons s ON ts.season_id = s.season_id
+        JOIN Conferences c ON t.conference_id = c.conference_id
+        ORDER BY s.season_id, t.team_name
+        """
+        
+        cursor.execute(query)
+        
+        # Conference mapping from ID to full name
+        conf_mapping = {'W': 'Western', 'E': 'Eastern'}
+        
+        # Process each row and build the dictionary
+        for row in cursor.fetchall():
+            season_id, team_name, conf_id, *stats = row
+            
+            # Create the team dictionary with exact same structure
+            team_dict = {
+                'team': team_name,
+                'conference': conf_mapping[conf_id],
+                'average_offensive_rating': np.float64(stats[0]),
+                'average_defensive_rating': np.float64(stats[1]),
+                'average_net_rating': np.float64(stats[2]),
+                'average_plus_minus': np.float64(stats[3]),
+                'relative_net_rating': np.float64(stats[4]),
+                'relative_offensive_rating': np.float64(stats[5]),
+                'relative_defensive_rating': np.float64(stats[6])
+            }
+            
+            result[season_id].append(team_dict)
+        
+        conn.close()
     
-    print("\nVerification Queries:")
-    
-    # Count total seasons
-    cursor.execute("SELECT COUNT(*) FROM Seasons")
-    print(f"Total seasons: {cursor.fetchone()[0]}")
-    
-    # Count total teams
-    cursor.execute("SELECT COUNT(*) FROM Teams")
-    print(f"Total teams: {cursor.fetchone()[0]}")
-    
-    # Count total stat entries
-    cursor.execute("SELECT COUNT(*) FROM TeamStats")
-    print(f"Total stat entries: {cursor.fetchone()[0]}")
-    
-    conn.close()
-
-
-
-if __name__ == '__main__':
-    try:
-        df = data_update_from_kaggle()
-    except Exception as e:
-        print(f"Failed to update data: {str(e)}")
-        raise
-
-    import sqlite3
-    con = sqlite3.connect("tutorial.db")
-    cur = con.cursor()
-    cur.executescript
+    # Convert defaultdict to regular dict
+    return dict(result)

@@ -1,0 +1,6 @@
+Django==5.0
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+numpy==1.26.2
+pandas==2.1.4
+kaggle==1.5.16

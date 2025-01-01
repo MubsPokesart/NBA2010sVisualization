@@ -7,6 +7,5 @@ urlpatterns = [
     path('teams/', views.TeamListView.as_view(), name='team-list'),
     path('seasons/', views.SeasonListView.as_view(), name='season-list'),
     path('stats/<str:season_id>/', views.SeasonStatsView.as_view(), name='season-stats'),
-    # Add a root API endpoint that returns available endpoints
-    path('', views.APIRootView.as_view(), name='api-root'),
+    path('update/status/', views.UpdateStatusView.as_view(), name='update-status'), 
 ]

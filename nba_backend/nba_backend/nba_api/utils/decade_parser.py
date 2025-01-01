@@ -107,6 +107,12 @@ WESTERN_CONFERENCE_TEAMS = {'Portland Trail Blazers', 'Los Angeles Lakers', 'Dal
 EASTERN_CONFERENCE_TEAMS = {'Cleveland Cavaliers', 'Atlanta Hawks', 'Miami Heat', 'Boston Celtics',  'Orlando Magic', 'Toronto Raptors', 'Chicago Bulls', 'New Jersey Nets', 'Detroit Pistons', 'Charlotte Bobcats', 'Philadelphia 76ers', 'Indiana Pacers', 'Washington Wizards', 'New York Knicks', 'Milwaukee Bucks', 'Brooklyn Nets', 'Charlotte Hornets'}
 ALL_NBA_TEAMS = WESTERN_CONFERENCE_TEAMS.union(EASTERN_CONFERENCE_TEAMS)
 
+def get_team_object():
+    return { 
+        "Western Conference": list(WESTERN_CONFERENCE_TEAMS), 
+        "Eastern Conference": list(EASTERN_CONFERENCE_TEAMS)
+        }
+
 def process_filter_db(dataframe=None):
     # Create DataFrame for summary and filter data 
     if dataframe is None:
@@ -255,3 +261,4 @@ def parse_decade_data(unfiltered_data):
     generate_relative_metrics(seasons_dict)
     
     return seasons_dict
+

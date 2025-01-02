@@ -32,6 +32,8 @@ source venv/Scripts/activate  # Windows
 source venv/bin/activate      # Unix/MacOS
 ```
 
+If all else fails, ``venv\Scripts\activate.bat`` works for me as well.
+
 3. Install dependencies:
 ```bash
 pip install -r requirements.txt
@@ -82,12 +84,12 @@ python manage.py runserver
 nba_backend/
 ├── manage.py
 ├── requirements.txt
-├── db/
-│   └── decade.sqlite
 ├── nba_backend/
 │   ├── settings.py
 │   └── urls.py
 └── nba_api/
+    ├── db/
+    │   └── decade.sqlite
     ├── models.py
     ├── views.py
     ├── urls.py
@@ -102,6 +104,7 @@ nba_backend/
 Run the test suite:
 ```bash
 python manage.py test
+python manage.py test nba_api.tests
 ```
 
 Or test individual endpoints:

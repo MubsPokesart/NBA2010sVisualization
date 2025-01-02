@@ -68,7 +68,7 @@ WSGI_APPLICATION = 'nba_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db' / 'decade.sqlite',
+        'NAME': BASE_DIR / 'nba_api' / 'db' / 'decade.sqlite',
     }
 }
 

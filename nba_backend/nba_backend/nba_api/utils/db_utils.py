@@ -212,9 +212,11 @@ def insert_team_stats(conn, data):
 def load_data_to_db(data_object, db_path): 
     # Connect to database
     conn = sqlite3.connect(db_path) 
-
     try:
-        # Create schema
+        
+        # If there's an existing schema, drop it
+        drop_existing_schema(conn)
+
         create_schema(conn)
         
         # Insert data
@@ -295,3 +297,12 @@ def extract_data_from_db(db_path):
     
     # Convert defaultdict to regular dict
     return dict(result)
+
+
+# Response to standing updataes
+def drop_existing_schema(conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    tables = [row[0] for row in cursor.fetchall()]
+    if tables:
+        cursor.executescript("DROP TABLE IF EXISTS " + ", ".join(tables))

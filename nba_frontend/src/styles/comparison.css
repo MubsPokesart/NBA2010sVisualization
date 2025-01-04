@@ -1,0 +1,22 @@
+.heatmap-container {
+    overflow-x: auto;
+}
+
+.heatmap-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.heatmap-cell {
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+
+.significant-positive {
+    background: rgba(49, 130, 206, 0.2);
+}
+
+.significant-negative {
+    background: rgba(229, 62, 62, 0.2);
+}

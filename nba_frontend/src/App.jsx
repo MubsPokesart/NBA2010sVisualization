@@ -1,13 +1,26 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import ClusterAnalysis from './pages/ClusterAnalysis';
 import SeasonalDistribution from './pages/SeasonalDistribution';
 import ConferenceComparison from './pages/ConferenceComparison';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
-const queryClient = new QueryClient();
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+      onError: (error) => {
+        console.error('Query Error:', error);
+      }
+    }
+  }
+});
 
 const App = () => {
   return (
@@ -25,6 +38,7 @@ const App = () => {
           </main>
         </div>
       </BrowserRouter>
+      <ReactQueryDevtools initialIsOpen={false} /> {/* This will help with debugging */}
     </QueryClientProvider>
   );
 };

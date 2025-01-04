@@ -50,7 +50,7 @@ export const fetchSeasons = async () => {
 
 export const fetchSeasonStats = async (seasonId) => {
     try {
-        const { data } = await api.get(`/seasons/${seasonId}/`);
+        const { data } = await api.get(`/stats/${seasonId}/`);
         return data;
     } catch (error) {
         console.error('Error fetching season stats:', error);

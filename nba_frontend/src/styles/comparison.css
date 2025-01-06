@@ -1,22 +1,159 @@
+/* Analysis Container */
+.analysis-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Header Styles */
+.analysis-header {
+    margin-bottom: 2rem;
+}
+
+.analysis-title {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.analysis-description {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+/* Section Styles */
+.analysis-section {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+.section-description {
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+/* Metrics Explanation */
+.metrics-explanation {
+    margin-bottom: 1.5rem;
+}
+
+.metrics-explanation h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+.metrics-explanation ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+}
+
+.metrics-explanation li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+/* Legend Styles */
+.legend-container {
+    margin-top: 1.5rem;
+}
+
+.legend {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.75rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-color {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 4px;
+}
+
+/* Heatmap Styles */
 .heatmap-container {
     overflow-x: auto;
+    margin-top: 1rem;
 }
 
 .heatmap-container table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.metric-header, .season-header {
+    padding: 0.75rem;
+    text-align: center;
+    background-color: var(--background-color);
+    font-weight: 600;
+}
+
+.metric-name {
+    padding: 0.75rem;
+    font-weight: 500;
 }
 
 .heatmap-cell {
-    padding: 1rem;
+    padding: 0.75rem;
     text-align: center;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
 }
 
 .significant-positive {
-    background: rgba(49, 130, 206, 0.2);
+    background: rgba(49, 130, 206, 0.1);
 }
 
 .significant-negative {
-    background: rgba(229, 62, 62, 0.2);
+    background: rgba(229, 62, 62, 0.1);
+}
+
+/* Key Findings */
+.key-findings ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+}
+
+.key-findings li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+/* Footer */
+.analysis-footer {
+    margin-top: 2rem;
+    color: var(--text-light);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .analysis-container {
+        padding: 1rem;
+    }
+    
+    .legend {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .analysis-title {
+        font-size: 1.5rem;
+    }
 }

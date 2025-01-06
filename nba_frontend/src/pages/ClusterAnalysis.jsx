@@ -33,18 +33,16 @@ const ClusterAnalysis = () => {
     );
   }
 
-  // Process the data directly without averaging
   const processedData = Object.entries(nbaData).flatMap(([season, teams]) =>
     teams.map(team => ({
       name: team.team,
       season,
       conference: team.conference,
-      relativeOffensive: parseFloat(team.relative_offensive_rating), // Ensure numeric
-      relativeDefensive: -1 * parseFloat(team.relative_defensive_rating)  // Ensure numeric
+      relativeOffensive: parseFloat(team.relative_offensive_rating),
+      relativeDefensive: -1 * parseFloat(team.relative_defensive_rating)
     }))
   );
 
-  // Find the domain for the axes
   const offensiveExtent = [
     Math.floor(Math.min(...processedData.map(d => d.relativeOffensive))),
     Math.ceil(Math.max(...processedData.map(d => d.relativeOffensive)))
@@ -54,6 +52,13 @@ const ClusterAnalysis = () => {
     Math.floor(Math.min(...processedData.map(d => d.relativeDefensive))),
     Math.ceil(Math.max(...processedData.map(d => d.relativeDefensive)))
   ];
+
+  const tooltipStyle = {
+    backgroundColor: '#fff',
+    padding: '12px',
+    border: '1px solid #ccc',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+  };
 
   return (
     <div className="analysis-container">
@@ -71,7 +76,7 @@ const ClusterAnalysis = () => {
               label={{ 
                 value: "Relative Offensive Rating", 
                 position: "bottom",
-                offset: 20
+                offset: 30
               }}
               tickCount={10}
             />
@@ -93,11 +98,11 @@ const ClusterAnalysis = () => {
                 if (payload && payload.length) {
                   const data = payload[0].payload;
                   return (
-                    <div className="bg-white p-3 border border-gray-200 shadow-lg">
-                      <p className="font-bold">{data.name}</p>
-                      <p>Season: {data.season}</p>
-                      <p>Conference: {data.conference}</p>
-                      <p>Relative Off. Rating: {data.relativeOffensive.toFixed(2)}</p>
+                    <div style={tooltipStyle}>
+                      <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>{data.name}</p>
+                      <p style={{ marginBottom: '4px' }}>Season: {data.season}</p>
+                      <p style={{ marginBottom: '4px' }}>Conference: {data.conference}</p>
+                      <p style={{ marginBottom: '4px' }}>Relative Off. Rating: {data.relativeOffensive.toFixed(2)}</p>
                       <p>Relative Def. Rating: {data.relativeDefensive.toFixed(2)}</p>
                     </div>
                   );
@@ -110,20 +115,19 @@ const ClusterAnalysis = () => {
               name="Western Conference"
               data={processedData.filter(d => d.conference === 'Western')}
               fill="#3182ce"
-              opacity={0.6}
             />
             <Scatter
               name="Eastern Conference"
               data={processedData.filter(d => d.conference === 'Eastern')}
               fill="#e53e3e"
-              opacity={0.6}
             />
           </ScatterChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-4 text-sm text-gray-600">
+      <div style={{ paddingTop: '4rem' }}>
         <p>* Each point represents a team's relative performance in a specific season</p>
         <p>* Higher offensive rating and lower defensive rating indicate better performance</p>
+        <p>* Defensive Rating is Inverted for Scatterplot Inutivity</p>
       </div>
     </div>
   );

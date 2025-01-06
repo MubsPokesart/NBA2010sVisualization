@@ -1,182 +1,211 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
 import { fetchSeasons, fetchSeasonStats } from '../services/api';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import '../styles/analysis.css';
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
 const SeasonalDistribution = () => {
-  const [selectedSeason, setSelectedSeason] = useState('2018-19');
-  const { data: seasons } = useQuery('seasons', fetchSeasons);
-  const { data: seasonData, isLoading } = useQuery(
+  const [selectedSeason, setSelectedSeason] = useState(null);
+  const { data: seasons, isLoading: loadingSeasons } = useQuery('seasons', fetchSeasons);
+  const { data: seasonData, isLoading: loadingStats } = useQuery(
     ['seasonStats', selectedSeason],
-    () => fetchSeasonStats(selectedSeason)
+    () => fetchSeasonStats(selectedSeason),
+    { enabled: !!selectedSeason }
   );
 
-  if (isLoading) return <div className="loading">Loading data...</div>;
-
-  if (!seasonData) return <div className="error">No data available</div>;
-
-  // Process data for Western Conference
-  const westData = seasonData
-    .filter(team => team.conference === 'Western')
-    .map(team => team.relative_net_rating);
-
-  // Process data for Eastern Conference
-  const eastData = seasonData
-    .filter(team => team.conference === 'Eastern')
-    .map(team => team.relative_net_rating);
-
-  // Calculate statistics for both conferences
-  const calculateStats = (data) => {
-    const sorted = [...data].sort((a, b) => a - b);
-    return {
-      min: sorted[0],
-      q1: sorted[Math.floor(sorted.length * 0.25)],
-      median: sorted[Math.floor(sorted.length * 0.5)],
-      q3: sorted[Math.floor(sorted.length * 0.75)],
-      max: sorted[sorted.length - 1],
-      mean: data.reduce((a, b) => a + b, 0) / data.length
-    };
-  };
-
-  const westStats = calculateStats(westData);
-  const eastStats = calculateStats(eastData);
-
-  // Create histogram data
-  const createHistogram = (data, bins = 10) => {
-    const min = Math.min(...data);
-    const max = Math.max(...data);
-    const binWidth = (max - min) / bins;
-    const histogram = new Array(bins).fill(0);
-    
-    data.forEach(value => {
-      const binIndex = Math.min(Math.floor((value - min) / binWidth), bins - 1);
-      histogram[binIndex]++;
-    });
-
-    return {
-      bins: histogram,
-      binLabels: Array.from({ length: bins }, (_, i) => 
-        `${(min + i * binWidth).toFixed(1)}-${(min + (i + 1) * binWidth).toFixed(1)}`
-      )
-    };
-  };
-
-  const westHistogram = createHistogram(westData);
-  const eastHistogram = createHistogram(eastData);
-
-  const chartData = {
-    labels: westHistogram.binLabels,
-    datasets: [
-      {
-        label: 'Western Conference',
-        data: westHistogram.bins,
-        backgroundColor: 'rgba(49, 130, 206, 0.5)',
-        borderColor: '#3182ce',
-        borderWidth: 1
-      },
-      {
-        label: 'Eastern Conference',
-        data: eastHistogram.bins,
-        backgroundColor: 'rgba(229, 62, 62, 0.5)',
-        borderColor: '#e53e3e',
-        borderWidth: 1
-      }
-    ]
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Distribution of Net Ratings by Conference'
-      },
-      tooltip: {
-        callbacks: {
-          title: (items) => `Rating Range: ${items[0].label}`,
-          label: (context) => `${context.dataset.label}: ${context.formattedValue} teams`
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Number of Teams'
-        }
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Relative Net Rating'
-        }
-      }
+  // Set initial selected season when seasons data loads
+  React.useEffect(() => {
+    if (seasons && seasons.length > 0 && !selectedSeason) {
+      setSelectedSeason(seasons[0]);
     }
+  }, [seasons, selectedSeason]);
+
+  if (loadingSeasons || loadingStats) {
+    return <div className="loading">Loading data...</div>;
+  }
+
+  if (!seasonData || !seasons) return <div className="error">No data available</div>;
+
+  // Process data for violin plot
+  const createViolinData = (data, conference) => {
+    const ratings = data.filter(team => team.conference === conference)
+                       .map(team => -team.relative_net_rating);
+    
+    // Calculate kernel density estimation
+    const min = Math.min(...ratings);
+    const max = Math.max(...ratings);
+    const step = (max - min) / 20;
+    const points = [];
+    
+    for (let x = min; x <= max; x += step) {
+      let density = 0;
+      ratings.forEach(rating => {
+        const kernelValue = Math.exp(-Math.pow(rating - x, 2) / 2);
+        density += kernelValue;
+      });
+      points.push({ density: density / ratings.length, rating: x });
+    }
+    
+    // Mirror the points for violin plot
+    return points.map(point => ({
+      density: point.density,
+      rating: point.rating,
+      [`${conference}Positive`]: point.density,
+      [`${conference}Negative`]: -point.density
+    }));
   };
+
+  const westData = createViolinData(seasonData, 'Western');
+  const eastData = createViolinData(seasonData, 'Eastern');
+  
+  // Merge west and east data
+  const mergedData = westData.map((westPoint, i) => ({
+    ...westPoint,
+    ...eastData[i]
+  }));
+
+  // Calculate means
+  const westStats = seasonData.filter(team => team.conference === 'Western')
+                    .map(team => team.relative_net_rating);
+  const eastStats = seasonData.filter(team => team.conference === 'Eastern')
+                    .map(team => team.relative_net_rating);
+  
+  const westMean = westStats.reduce((a, b) => a + b, 0) / westStats.length;
+  const eastMean = eastStats.reduce((a, b) => a + b, 0) / eastStats.length;
 
   return (
     <div className="analysis-container">
-      <h2 className="analysis-title">Conference Rating Distribution</h2>
+      <h2 className="analysis-title">Conference Net Rating Distribution</h2>
       
-      <div className="mb-4">
+      <div className="mb-6">
         <select 
-          className="analysis-select"
-          value={selectedSeason}
+          className="w-48 p-2 border rounded"
+          value={selectedSeason || ''}
           onChange={(e) => setSelectedSeason(e.target.value)}
         >
-          {seasons?.map(season => (
-            <option key={season} value={season}>{season}</option>
+          {seasons.map(season => (
+            <option key={season} value={season}>
+              {season} Season
+            </option>
           ))}
         </select>
       </div>
 
-      <div className="chart-container">
-        <Bar options={options} data={chartData} />
+      <div className="bg-white p-6 rounded shadow">
+        <ResponsiveContainer width="100%" height={600}>
+          <AreaChart 
+            data={mergedData} 
+            layout="vertical"
+            margin={{ top: 20, right: 120, bottom: 20, left: 120 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              type="number"
+              domain={['auto', 'auto']}
+              label={{ 
+                value: 'Density', 
+                position: 'bottom',
+                offset: 0
+              }}
+            />
+            <YAxis 
+              dataKey="rating" 
+              type="number"
+              label={{ 
+                value: 'Net Rating', 
+                angle: -90, 
+                position: 'insideLeft', 
+                offset: -35
+              }}
+            />
+            <Tooltip 
+              content={({ payload }) => {
+                if (payload && payload.length) {
+                  return (
+                    <div className="bg-white p-2 border rounded shadow">
+                      <p>Net Rating: {payload[0].payload.rating.toFixed(2)}</p>
+                      <p>Density: {Math.abs(payload[0].value).toFixed(3)}</p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="WesternPositive"
+              stackId="1"
+              stroke="#3182ce"
+              fill="#3182ce"
+              fillOpacity={0.6}
+              name="Western"
+            />
+            <Area
+              type="monotone"
+              dataKey="WesternNegative"
+              stackId="2"
+              stroke="#3182ce"
+              fill="#3182ce"
+              fillOpacity={0.6}
+            />
+            <Area
+              type="monotone"
+              dataKey="EasternPositive"
+              stackId="3"
+              stroke="#e53e3e"
+              fill="#e53e3e"
+              fillOpacity={0.6}
+              name="Eastern"
+            />
+            <Area
+              type="monotone"
+              dataKey="EasternNegative"
+              stackId="4"
+              stroke="#e53e3e"
+              fill="#e53e3e"
+              fillOpacity={0.6}
+            />
+            <ReferenceLine 
+              y={westMean} 
+              stroke="#3182ce" 
+              strokeDasharray="3 3"
+              label={{ 
+                value: 'West Mean', 
+                position: 'right', 
+                fill: '#3182ce' 
+              }}
+            />
+            <ReferenceLine 
+              y={eastMean} 
+              stroke="#e53e3e" 
+              strokeDasharray="3 3"
+              label={{ 
+                value: 'East Mean', 
+                position: 'left', 
+                fill: '#e53e3e' 
+              }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="bg-blue-50 p-4 rounded">
-          <h3 className="font-bold text-blue-700 mb-2">Western Conference Stats</h3>
-          <p>Mean: {westStats.mean.toFixed(2)}</p>
-          <p>Median: {westStats.median.toFixed(2)}</p>
-          <p>Range: {westStats.min.toFixed(2)} to {westStats.max.toFixed(2)}</p>
-          <p>IQR: {westStats.q1.toFixed(2)} to {westStats.q3.toFixed(2)}</p>
+      <div className="mt-8">
+        <div className="flex justify-center items-center gap-8">
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-blue-500 opacity-60 mr-2"></div>
+            <span>Western Conference</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-red-500 opacity-60 mr-2"></div>
+            <span>Eastern Conference</span>
+          </div>
         </div>
-        <div className="bg-red-50 p-4 rounded">
-          <h3 className="font-bold text-red-700 mb-2">Eastern Conference Stats</h3>
-          <p>Mean: {eastStats.mean.toFixed(2)}</p>
-          <p>Median: {eastStats.median.toFixed(2)}</p>
-          <p>Range: {eastStats.min.toFixed(2)} to {eastStats.max.toFixed(2)}</p>
-          <p>IQR: {eastStats.q1.toFixed(2)} to {eastStats.q3.toFixed(2)}</p>
-        </div>
+        <p className="text-center mt-4 text-gray-600">
+          * Violin plots show the distribution of team net ratings. Wider sections represent more teams with that rating.
+        </p>
+        <p className="text-center mt-2 text-gray-600">
+          * Dashed lines indicate conference means.
+        </p>
       </div>
     </div>
   );

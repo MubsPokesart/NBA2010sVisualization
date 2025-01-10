@@ -1,0 +1,44 @@
+{
+  "id": "wyattowalsh/basketball",
+  "id_no": 1218020,
+  "datasetSlugNullable": "basketball",
+  "ownerUserNullable": "wyattowalsh",
+  "usabilityRatingNullable": 0.9411764705882353,
+  "titleNullable": "NBA Database",
+  "subtitleNullable": "Daily Updated SQLite Database \u2014 64,000+ Games, 4800+ Players, and 30 Teams \ud83c\udfc0",
+  "descriptionNullable": "<blockquote><h2>Welcome to the <i><b>NBA Database</b></i>! \ud83d\udc4b \ud83c\udfc0 \u26f9\ufe0f\u200d\u2642\ufe0f </h2></blockquote>\n\nThis dataset is updated daily and includes:\n\n- **30** teams\n- **4800+** players\n- **65,000+** games (every game since the inaugural 1946-47 NBA season)\n- **Box Scores** for over 95% of all games\n- **Play-by-Play** game data with ***13M+ rows*** of Play-by-Play data in all!\n\n\n---\n\n- See [here](https://www.kaggle.com/wyattowalsh/using-sql) for tips on using SQL with this database\n- [daily updater notebook](https://www.kaggle.com/code/wyattowalsh/database-updater-daily) and [monthly updater notebook](https://www.kaggle.com/code/wyattowalsh/database-updater-monthly)\n\n\u2b95 View the <a href=\"https://github.com/wyattowalsh/nba-db\">associated GitHub repo<img src=\"https://gist.githubusercontent.com/wyattowalsh/33b635109116e07044c6336527681051/raw/6b24b749532f4e167657fcc014a310b8c4bfa661/github.svg\"></a> and [code base docs site \ud83d\udcc4](https://nba-db.readthedocs.io/)\n\u2b95 Sponsor project: <a href=\"https://github.com/sponsors/wyattowalsh\"><img src=\"https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86\"></a>\n\n---\n\n<h5>Built With:</h5>\n \n<a href=\"https://www.kaggle.com/docs\" target=\"_blank\"><img alt=\"Kaggle\" src=\"https://img.shields.io/badge/kaggle-%2320BEFF.svg?&style=for-the-badge&logo=kaggle&logoColor=white\"></a><a href=\"https://docs.github.com/en\" target=\"_blank\"><img alt=\"GitHub\" src=\"https://img.shields.io/badge/github-%23181717.svg?&style=for-the-badge&logo=github&logoColor=white\"></a><a href=\"https://docs.python.org/3/\" target=\"_blank\"><img alt=\"Python\" src=\"https://img.shields.io/badge/python%20-%2314354C.svg?&style=for-the-badge&logo=python&logoColor=white\"></a><a href=\"https://sqlite.org/docs.html\" target=\"_blank\"><img alt=\"SQLite\" src=\"https://img.shields.io/badge/sqlite%20-%23003B57.svg?&style=for-the-badge&logo=sqlite&logoColor=white\"></a> <img src=\"https://raw.githubusercontent.com/wyattowalsh/nba-db/main/docs/_static/img/logo.svg\">\n",
+  "datasetId": 1218020,
+  "datasetSlug": "basketball",
+  "hasDatasetSlug": true,
+  "ownerUser": "wyattowalsh",
+  "hasOwnerUser": true,
+  "usabilityRating": 0.9411764705882353,
+  "hasUsabilityRating": true,
+  "totalViews": 287911,
+  "totalVotes": 681,
+  "totalDownloads": 35601,
+  "title": "NBA Database",
+  "hasTitle": true,
+  "subtitle": "Daily Updated SQLite Database \u2014 64,000+ Games, 4800+ Players, and 30 Teams \ud83c\udfc0",
+  "hasSubtitle": true,
+  "description": "<blockquote><h2>Welcome to the <i><b>NBA Database</b></i>! \ud83d\udc4b \ud83c\udfc0 \u26f9\ufe0f\u200d\u2642\ufe0f </h2></blockquote>\n\nThis dataset is updated daily and includes:\n\n- **30** teams\n- **4800+** players\n- **65,000+** games (every game since the inaugural 1946-47 NBA season)\n- **Box Scores** for over 95% of all games\n- **Play-by-Play** game data with ***13M+ rows*** of Play-by-Play data in all!\n\n\n---\n\n- See [here](https://www.kaggle.com/wyattowalsh/using-sql) for tips on using SQL with this database\n- [daily updater notebook](https://www.kaggle.com/code/wyattowalsh/database-updater-daily) and [monthly updater notebook](https://www.kaggle.com/code/wyattowalsh/database-updater-monthly)\n\n\u2b95 View the <a href=\"https://github.com/wyattowalsh/nba-db\">associated GitHub repo<img src=\"https://gist.githubusercontent.com/wyattowalsh/33b635109116e07044c6336527681051/raw/6b24b749532f4e167657fcc014a310b8c4bfa661/github.svg\"></a> and [code base docs site \ud83d\udcc4](https://nba-db.readthedocs.io/)\n\u2b95 Sponsor project: <a href=\"https://github.com/sponsors/wyattowalsh\"><img src=\"https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86\"></a>\n\n---\n\n<h5>Built With:</h5>\n \n<a href=\"https://www.kaggle.com/docs\" target=\"_blank\"><img alt=\"Kaggle\" src=\"https://img.shields.io/badge/kaggle-%2320BEFF.svg?&style=for-the-badge&logo=kaggle&logoColor=white\"></a><a href=\"https://docs.github.com/en\" target=\"_blank\"><img alt=\"GitHub\" src=\"https://img.shields.io/badge/github-%23181717.svg?&style=for-the-badge&logo=github&logoColor=white\"></a><a href=\"https://docs.python.org/3/\" target=\"_blank\"><img alt=\"Python\" src=\"https://img.shields.io/badge/python%20-%2314354C.svg?&style=for-the-badge&logo=python&logoColor=white\"></a><a href=\"https://sqlite.org/docs.html\" target=\"_blank\"><img alt=\"SQLite\" src=\"https://img.shields.io/badge/sqlite%20-%23003B57.svg?&style=for-the-badge&logo=sqlite&logoColor=white\"></a> <img src=\"https://raw.githubusercontent.com/wyattowalsh/nba-db/main/docs/_static/img/logo.svg\">\n",
+  "hasDescription": true,
+  "isPrivate": false,
+  "keywords": [
+    "arts and entertainment",
+    "basketball",
+    "sports",
+    "business",
+    "education",
+    "classification"
+  ],
+  "licenses": [
+    {
+      "nameNullable": "CC-BY-SA-4.0",
+      "name": "CC-BY-SA-4.0",
+      "hasName": true
+    }
+  ],
+  "collaborators": [],
+  "data": []
+}

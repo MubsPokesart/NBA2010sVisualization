@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 dirname = os.path.dirname(__file__)
-os.environ["KAGGLE_CONFIG_DIR"] = os.path.join(dirname, 'kaggle')
-print(os.environ.get('KAGGLE_USERNAME'))
+
 
 print(os.environ.get('KAGGLE_CONFIG_DIR'))
 from kaggle.api.kaggle_api_extended import KaggleApi
